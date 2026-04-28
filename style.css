@@ -1,0 +1,79 @@
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;overflow:hidden;height:100vh;width:100vw;background:#111}
+
+#gameScreen{display:flex;flex-direction:column;height:100vh}
+#gameCanvas{flex:1;display:block;width:100%}
+
+/* Toolbar */
+.poly-toolbar{height:46px;background:rgba(255,255,255,0.97);display:flex;align-items:center;justify-content:space-between;padding:0 10px;z-index:50;position:relative;border-bottom:1px solid rgba(0,0,0,0.09);flex-shrink:0;box-shadow:0 2px 12px rgba(0,0,0,0.12)}
+.tb-left,.tb-right{display:flex;align-items:center;gap:5px}
+.tb-center{flex:1;display:flex;justify-content:center}
+.tb-sep{width:1px;height:26px;background:rgba(0,0,0,0.1);margin:0 3px}
+.tb-btn{border:none;cursor:pointer;border-radius:7px;font-family:'Nunito',sans-serif;font-weight:800;transition:all .15s;display:flex;align-items:center;gap:4px;font-size:13px}
+.icon-btn{width:34px;height:34px;background:transparent;color:#555;padding:0;justify-content:center}
+.icon-btn:hover{background:rgba(0,0,0,0.07);color:#222}
+.icon-btn.danger:hover{background:rgba(200,40,40,0.1);color:#c02020}
+.icon-btn.active-icon{background:rgba(240,180,0,0.2);color:#a07000}
+.mode-btn{padding:5px 12px;height:32px;background:#eee;color:#555;letter-spacing:.5px}
+.mode-btn:hover{background:#ddd;color:#222}
+.active-build{background:linear-gradient(180deg,#f7c948,#e09c10)!important;color:#3a2000!important;box-shadow:0 2px 0 #a06808}
+.active-test{background:linear-gradient(180deg,#5bc84a,#3a9e28)!important;color:#fff!important;box-shadow:0 2px 0 #2a6e1a}
+.reset-mode{background:#ffe0e0;color:#c02020}.reset-mode:hover{background:#ffc8c8}
+.budget-box{background:rgba(0,0,0,0.05);border-radius:8px;padding:2px 16px;text-align:center;min-width:130px}
+.budget-spent{font-family:'Baloo 2',cursive;font-size:17px;color:#2a8a00;line-height:1.2}
+.budget-total{font-size:11px;color:#888;font-weight:700}
+.budget-over{color:#c02020!important}
+.level-chip{background:#cc2c2c;color:#fff;border-radius:50px;padding:3px 12px;font-family:'Baloo 2',cursive;font-size:13px}
+
+/* Material bar */
+.material-bar{height:58px;background:rgba(18,18,18,0.97);display:flex;align-items:center;justify-content:space-between;padding:0 16px;flex-shrink:0;border-top:2px solid rgba(255,255,255,0.07)}
+.mat-group{display:flex;gap:8px;align-items:center}
+.mat-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 10px;border:2px solid transparent;border-radius:8px;cursor:pointer;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.6);font-family:'Nunito',sans-serif;font-size:10px;font-weight:800;letter-spacing:.5px;transition:all .15s;min-width:52px}
+.mat-btn:hover{background:rgba(255,255,255,0.12);color:#fff}
+.mat-btn.selected{border-color:#f0c040;background:rgba(240,192,64,0.15);color:#f0c040}
+.mat-swatch{width:28px;height:13px;border-radius:3px}
+.mat-info{display:flex;flex-direction:column;gap:3px;color:rgba(255,255,255,0.45);font-size:11px;font-weight:700;text-align:right}
+
+/* Tutorial hint */
+.tut-hint{position:absolute;top:54px;left:50%;transform:translateX(-50%);background:rgba(60,160,50,0.92);border-radius:50px;padding:5px 20px;font-size:13px;font-weight:800;color:#fff;z-index:40;white-space:nowrap;pointer-events:none;box-shadow:0 2px 10px rgba(0,0,0,0.2);display:flex;align-items:center;gap:6px}
+
+/* Stress legend */
+.stress-legend{position:absolute;bottom:66px;right:14px;background:rgba(255,255,255,0.9);border-radius:10px;padding:6px 12px;display:flex;gap:12px;align-items:center;box-shadow:0 2px 10px rgba(0,0,0,0.12);font-size:11px;font-weight:800;color:#444;backdrop-filter:blur(8px)}
+.sl-item{display:flex;align-items:center;gap:4px}
+.sl-dot{width:9px;height:9px;border-radius:50%}
+
+/* Modals */
+.modal-overlay{position:fixed;inset:0;background:rgba(20,10,40,0.65);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;z-index:200}
+.modal-overlay.hidden{display:none}
+.poly-modal{background:rgba(255,255,255,0.95);border-radius:22px;padding:28px 34px;min-width:340px;max-width:500px;box-shadow:0 24px 64px rgba(0,0,0,0.4);text-align:center;animation:popIn .3s cubic-bezier(.34,1.56,.64,1)}
+@keyframes popIn{from{opacity:0;transform:scale(.8) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal-head{font-family:'Baloo 2',cursive;font-size:24px;color:#222;margin-bottom:16px;display:flex;align-items:center;justify-content:center;gap:10px}
+.win-head{color:#b08000}.fail-head{color:#c02020}
+.modal-msg{color:#666;font-size:15px;margin-bottom:16px}
+.star-row{font-size:28px;margin-bottom:20px}
+.modal-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.poly-btn{border:none;cursor:pointer;font-family:'Baloo 2',cursive;font-size:16px;letter-spacing:1px;border-radius:50px;padding:11px 28px;transition:all .18s;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.primary-btn{background:linear-gradient(180deg,#f7c948,#e09c10);color:#3a2000;box-shadow:0 4px 0 #a06808}
+.primary-btn:hover{transform:translateY(-2px)}
+.secondary-btn{background:rgba(0,0,0,0.08);color:#444}
+.secondary-btn:hover{background:rgba(0,0,0,0.14)}
+
+/* Responsive game UI */
+@media(max-width:640px){
+  .poly-toolbar{height:42px;padding:0 6px;gap:2px}
+  .icon-btn{width:30px;height:30px}
+  .mode-btn{padding:4px 8px;height:28px;font-size:11px;letter-spacing:0}
+  .budget-box{min-width:90px;padding:2px 8px}
+  .budget-spent{font-size:14px}
+  .budget-total{font-size:9px}
+  .level-chip{font-size:11px;padding:2px 8px}
+  .mode-badge{font-size:9px;padding:3px 8px}
+  .tb-sep{margin:0 1px}
+  .material-bar{height:52px;padding:0 8px}
+  .mat-btn{min-width:42px;padding:3px 6px;font-size:9px}
+  .mat-swatch{width:22px;height:10px}
+  .mat-info{font-size:9px}
+  .poly-modal{min-width:0;width:calc(100vw - 32px);padding:20px 20px}
+  .modal-head{font-size:20px}
+  .poly-btn{font-size:14px;padding:9px 18px}
+}

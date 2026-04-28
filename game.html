@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bridge Simulator</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet"/>
+  <style>
+    /* Mode badge in toolbar */
+    .mode-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;
+      border-radius:20px;font-size:11px;font-weight:900;letter-spacing:.8px;text-transform:uppercase}
+    .mode-badge.classic{background:rgba(60,200,120,0.2);border:1px solid rgba(80,220,140,0.4);color:#5ce85c}
+    .mode-badge.ranked{background:rgba(255,180,30,0.2);border:1px solid rgba(255,200,60,0.4);color:#ffd44a}
+
+    /* Step-by-step tutorial panel */
+    .tut-panel{position:absolute;top:58px;left:16px;z-index:40;
+      background:rgba(10,30,10,0.94);backdrop-filter:blur(18px);
+      border:1.5px solid rgba(80,220,80,0.45);border-radius:18px;
+      padding:13px 16px 12px;min-width:238px;max-width:280px;
+      box-shadow:0 6px 28px rgba(0,0,0,0.45),0 0 0 1px rgba(80,220,80,0.08);
+      animation:slideInLeft .35s ease both}
+    @keyframes slideInLeft{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:translateX(0)}}
+    .tut-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+    .tut-badge{background:rgba(80,220,80,0.18);color:#5ce85c;font-size:9px;font-weight:900;
+      letter-spacing:2px;padding:2px 8px;border-radius:10px;text-transform:uppercase}
+    .tut-progress{color:rgba(255,255,255,0.45);font-size:10px;font-weight:800;font-family:'Nunito',sans-serif}
+    .tut-body{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
+    .tut-step-icon{font-size:22px;line-height:1;flex-shrink:0;margin-top:1px}
+    .tut-step-text{color:#fff;font-size:12px;font-weight:700;line-height:1.55;font-family:'Nunito',sans-serif}
+    .tut-step-text b{color:#7de87d;display:block;margin-bottom:2px;font-size:12.5px}
+    .tut-dots{display:flex;gap:5px;justify-content:center}
+    .tut-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.15);transition:all .3s}
+    .tut-dot.done{background:rgba(80,200,80,0.55)}
+    .tut-dot.active{background:#5ce85c;width:18px;border-radius:4px}
+    @media(max-width:640px){
+      .tut-panel{top:50px;left:8px;min-width:180px;max-width:200px;padding:10px 12px 9px;border-radius:14px}
+      .tut-step-text{font-size:10.5px}
+      .tut-step-icon{font-size:18px}
+    }
+    .star-row{font-size:36px;letter-spacing:4px;margin:8px 0;text-align:center;min-height:46px}
+    .star-row .dim{opacity:0.2}
+    .star-earned{animation:starPop 0.4s ease both}
+    @keyframes starPop{0%{transform:scale(0.2);opacity:0}70%{transform:scale(1.3)}100%{transform:scale(1);opacity:1}}
+
+    /* Best cost badge in win */
+    .best-badge{display:none;padding:5px 14px;border-radius:20px;
+      background:rgba(255,200,60,0.15);border:1px solid rgba(255,200,60,0.3);
+      font-size:11px;font-weight:800;color:rgba(255,200,80,0.9);letter-spacing:.5px;text-align:center;margin-top:2px}
+    .best-badge.show{display:block}
+    /* Name entry modal */
+    .name-modal-box{max-width:360px;text-align:center}
+    .name-modal-box h2{font-family:'Baloo 2',cursive;font-size:22px;color:#ffd44a;margin-bottom:6px}
+    .name-modal-box p{font-size:12px;color:rgba(255,255,255,0.55);margin-bottom:18px;line-height:1.5}
+    .name-input{width:100%;padding:11px 16px;border-radius:12px;border:2px solid rgba(255,200,60,0.4);
+      background:rgba(255,255,255,0.08);color:#fff;font-size:15px;font-weight:800;
+      font-family:'Nunito',sans-serif;outline:none;text-align:center;transition:border .2s}
+    .name-input:focus{border-color:rgba(255,200,60,0.9)}
+    .name-input.shake{animation:shake .4s ease}
+    @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+    .name-error{color:#ff7070;font-size:11px;font-weight:800;margin-top:7px;display:none}
+    .name-submit{margin-top:14px;width:100%;padding:12px;border:none;border-radius:50px;
+      background:linear-gradient(135deg,#ffd44a,#ff8c28);color:#1a0800;font-family:'Baloo 2',cursive;
+      font-size:15px;font-weight:800;letter-spacing:1px;cursor:pointer;transition:all .18s}
+    .name-submit:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(255,180,40,0.4)}
+    .name-submit:active{transform:translateY(1px)}
+  </style>
+</head>
+<body>
+
+<div id="gameScreen">
+  <!-- TOP TOOLBAR -->
+  <div class="poly-toolbar">
+    <div class="tb-left">
+      <button class="tb-btn icon-btn" onclick="exitGame()" title="Level Select">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="tb-sep"></div>
+      <button class="tb-btn icon-btn" id="gridBtn" onclick="toggleGrid()" title="Toggle Grid">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      </button>
+    </div>
+
+    <div class="tb-center">
+      <div class="budget-box">
+        <div class="budget-spent" id="budgetSpent">$0</div>
+        <div class="budget-total" id="budgetLabel">Budget: $0</div>
+      </div>
+    </div>
+
+    <div class="tb-right">
+      <button class="tb-btn icon-btn" onclick="undoLast()" title="Undo (Ctrl+Z)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 7h10a5 5 0 010 10H9"/><polyline points="3 7 7 3 7 11"/></svg>
+      </button>
+      <button class="tb-btn icon-btn danger" onclick="clearAll()" title="Clear All">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg>
+      </button>
+      <div class="tb-sep"></div>
+      <button class="tb-btn mode-btn" onclick="loadReplay()" title="Load Saved Replay" style="font-size:11px;letter-spacing:.5px">📼 REPLAY</button>
+      <div class="tb-sep"></div>
+      <button id="btnBuild" class="tb-btn mode-btn active-build" onclick="setMode('build')">🔨 BUILD</button>
+      <button id="btnTest"  class="tb-btn mode-btn"              onclick="setMode('test')">▶ TEST</button>
+      <button class="tb-btn mode-btn reset-mode" onclick="resetLevel()" title="Reset">↺</button>
+      <div class="tb-sep"></div>
+      <div class="level-chip" id="levelLabel">LVL 1</div>
+      <div class="mode-badge" id="modeBadge"></div>
+    </div>
+  </div>
+
+  <!-- Step-by-step Tutorial Panel -->
+  <div class="tut-panel" id="tutPanel" style="display:none">
+    <div class="tut-header">
+      <span class="tut-badge">TUTORIAL</span>
+      <span class="tut-progress" id="tutProgress">Step 1 / 5</span>
+    </div>
+    <div class="tut-body">
+      <span class="tut-step-icon" id="tutStepIcon">👆</span>
+      <div class="tut-step-text" id="tutText"></div>
+    </div>
+    <div class="tut-dots" id="tutDots">
+      <span class="tut-dot active"></span>
+      <span class="tut-dot"></span>
+      <span class="tut-dot"></span>
+      <span class="tut-dot"></span>
+      <span class="tut-dot"></span>
+    </div>
+  </div>
+
+  <!-- Canvas -->
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- Bottom material bar -->
+  <div class="material-bar">
+    <div class="mat-group">
+      <button class="mat-btn" id="mat-road"  onclick="selectMat('road')"  title="Road">
+        <div class="mat-swatch" style="background:#2a2a2a;border:2px solid #555"></div>
+        <span>ROAD</span>
+      </button>
+      <button class="mat-btn" id="mat-wood"  onclick="selectMat('wood')"  title="Wood">
+        <div class="mat-swatch" style="background:#c8843a;border:2px solid #a06020"></div>
+        <span>WOOD</span>
+      </button>
+      <button class="mat-btn" id="mat-steel" onclick="selectMat('steel')" title="Steel">
+        <div class="mat-swatch" style="background:#cc2c2c;border:2px solid #8e1c1c"></div>
+        <span>STEEL</span>
+      </button>
+      <button class="mat-btn" id="mat-cable" onclick="selectMat('cable')" title="Cable">
+        <div class="mat-swatch" style="background:#888;border:2px solid #555"></div>
+        <span>CABLE</span>
+      </button>
+      <button class="mat-btn" id="mat-iron"  onclick="selectMat('iron')"  title="Iron">
+        <div class="mat-swatch" style="background:#5a6a8a;border:2px solid #3a4a6a"></div>
+        <span>IRON</span>
+      </button>
+    </div>
+    <div class="mat-info">
+      <span id="matCostLabel">Select a material</span>
+    </div>
+  </div>
+
+  <!-- Stress legend -->
+  <div class="stress-legend">
+    <div class="sl-item"><div class="sl-dot" style="background:#4a9e3f"></div>Safe</div>
+    <div class="sl-item"><div class="sl-dot" style="background:#e8a020"></div>Stressed</div>
+    <div class="sl-item"><div class="sl-dot" style="background:#cc2c2c"></div>Breaking</div>
+  </div>
+</div>
+
+<!-- WIN MODAL -->
+<div id="winModal" class="modal-overlay hidden">
+  <div class="poly-modal">
+    <div class="modal-head win-head">🏆 BRIDGE HOLDS!</div>
+    <p id="winMsg" class="modal-msg"></p>
+    <div class="star-row" id="starRow"></div>
+    <div class="best-badge" id="bestBadge"></div>
+    <div class="best-badge" id="rankBadge" style="border-color:rgba(100,180,255,0.3);background:rgba(60,120,255,0.1);color:rgba(140,200,255,0.9)"></div>
+    <div class="modal-btns">
+      <button class="poly-btn primary-btn" onclick="goNextLevel()">NEXT LEVEL ›</button>
+      <button class="poly-btn secondary-btn" onclick="resetLevel()">RETRY</button>
+      <button class="poly-btn secondary-btn" onclick="exitGame()">LEVELS</button>
+      <a class="poly-btn secondary-btn" href="leaderboard.html" style="text-decoration:none;text-align:center">🏆 SCORES</a>
+    </div>
+  </div>
+</div>
+
+<!-- FAIL MODAL -->
+<div id="failModal" class="modal-overlay hidden">
+  <div class="poly-modal">
+    <div class="modal-head fail-head">💥 BRIDGE FAILED!</div>
+    <p id="failMsg" class="modal-msg"></p>
+    <div class="modal-btns">
+      <button class="poly-btn primary-btn" onclick="resetLevel()">TRY AGAIN</button>
+      <button class="poly-btn secondary-btn" onclick="exitGame()">LEVEL SELECT</button>
+    </div>
+  </div>
+</div>
+
+<!-- NAME MODAL — shown on first launch, blocks game until name entered -->
+<div id="nameModal" class="modal-overlay hidden">
+  <div class="poly-modal name-modal-box">
+    <div class="modal-head win-head">👤 Welcome!</div>
+    <h2>Enter Your Name</h2>
+    <p>Your name will appear on the leaderboard.<br>You can't skip this — pick something good!</p>
+    <input id="nameInput" class="name-input" type="text" maxlength="20"
+      placeholder="Your name…"
+      onkeydown="if(event.key==='Enter') submitName()"
+      oninput="document.getElementById('nameError').style.display='none'"/>
+    <div class="name-error" id="nameError">⚠ Please enter a name to continue.</div>
+    <button class="name-submit" onclick="submitName()">Let's Build! 🏗️</button>
+  </div>
+</div>
+
+<script src="audio.js"></script>
+<script src="leaderboard.js"></script>
+<script src="replay.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

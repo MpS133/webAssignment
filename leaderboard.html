@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Leaderboard — Bridge Simulator V6</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Nunito',sans-serif;min-height:100vh;background:#080418;color:#fff}
+
+    .bg{position:fixed;inset:0;background:linear-gradient(180deg,#080418 0%,#0d1030 50%,#060218 100%)}
+
+    .page{position:relative;z-index:10;max-width:760px;margin:0 auto;padding:24px 16px 60px}
+
+    /* Header */
+    .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;gap:10px;flex-wrap:wrap}
+    .back-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;
+      background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);
+      border-radius:50px;color:rgba(255,255,255,0.8);font-weight:800;text-decoration:none;font-size:13px;transition:all .2s}
+    .back-btn:hover{background:rgba(255,255,255,0.15);color:#fff}
+    .page-title{font-family:'Baloo 2',cursive;font-size:26px;color:#ffd44a;
+      text-shadow:0 0 20px rgba(255,200,60,0.5)}
+    .header-btns{display:flex;gap:8px}
+    .hdr-btn{padding:8px 14px;background:rgba(255,200,60,0.1);border:1px solid rgba(255,200,60,0.28);
+      border-radius:50px;color:rgba(255,220,100,0.9);font-size:11px;font-weight:800;
+      cursor:pointer;font-family:'Nunito',sans-serif;transition:all .2s}
+    .hdr-btn:hover{background:rgba(255,200,60,0.22)}
+    .hdr-btn.danger{background:rgba(200,40,40,0.1);border-color:rgba(255,60,60,0.28);color:rgba(255,140,140,0.9)}
+    .hdr-btn.danger:hover{background:rgba(200,40,40,0.22)}
+
+    /* Tabs */
+    .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+    .tab{padding:5px 12px;border-radius:30px;border:1px solid rgba(255,255,255,0.12);
+      background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.45);
+      font-size:11px;font-weight:800;cursor:pointer;transition:all .18s;font-family:'Nunito',sans-serif}
+    .tab:hover{background:rgba(255,255,255,0.10);color:rgba(255,255,255,0.8)}
+    .tab.active{background:rgba(255,180,30,0.2);border-color:rgba(255,200,60,0.5);color:#ffd44a}
+    .tab .cnt{opacity:.6;font-size:9px;margin-left:3px}
+
+    /* Table */
+    .board{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:18px;overflow:hidden}
+    .board-header{display:grid;grid-template-columns:42px 1fr 80px 80px 76px 72px;
+      padding:10px 16px;background:rgba(255,255,255,0.06);
+      font-size:10px;font-weight:900;letter-spacing:1.5px;color:rgba(255,255,255,0.32);text-transform:uppercase}
+    .row{display:grid;grid-template-columns:42px 1fr 80px 80px 76px 72px;
+      padding:11px 16px;border-top:1px solid rgba(255,255,255,0.05);align-items:center;transition:background .15s}
+    .row:hover{background:rgba(255,255,255,0.04)}
+    .row.gold  {background:rgba(255,200,60,0.06)}
+    .row.silver{background:rgba(200,200,220,0.05)}
+    .row.bronze{background:rgba(200,140,80,0.05)}
+    .rank-num{font-family:'Baloo 2',cursive;font-size:17px;color:rgba(255,255,255,0.28);text-align:center}
+    .rank-num.g{color:#ffd700}.rank-num.s{color:#c0c0d0}.rank-num.b{color:#cd7f32}
+    .pname{font-size:13px;font-weight:800;color:#fff}
+    .pname.me{color:#ffd44a}
+    .stars-col{font-size:13px;letter-spacing:-1px}
+    .cost-col{font-size:12px;font-weight:700;color:rgba(255,255,255,0.6);font-family:'Baloo 2',cursive}
+    .pill{font-size:9px;font-weight:900;padding:2px 8px;border-radius:10px;letter-spacing:.4px}
+    .pill.ranked {background:rgba(255,180,30,0.15);color:#ffc840;border:1px solid rgba(255,200,60,0.3)}
+    .pill.classic{background:rgba(60,200,120,0.10);color:#5ce85c;border:1px solid rgba(80,220,140,0.3)}
+    .date-col{font-size:10px;color:rgba(255,255,255,0.25)}
+    .empty{text-align:center;padding:40px;color:rgba(255,255,255,0.22);font-size:13px;font-weight:700}
+
+    @media(max-width:580px){
+      .board-header,.row{grid-template-columns:36px 1fr 64px 64px 60px 0px}
+      .date-col{display:none}
+    }
+  </style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="page">
+
+  <div class="header">
+    <a class="back-btn" href="index.html">‹ Home</a>
+    <div class="page-title">🏆 Leaderboard</div>
+    <div class="header-btns">
+      <button class="hdr-btn" onclick="exportLB()">Export .txt</button>
+      <button class="hdr-btn danger" onclick="clearLB()">Clear All</button>
+    </div>
+  </div>
+
+  <div class="tabs" id="tabs"></div>
+
+  <div class="board">
+    <div class="board-header">
+      <div>#</div><div>Player</div><div>Stars</div>
+      <div>Cost</div><div>Mode</div><div>Date</div>
+    </div>
+    <div id="tableBody"></div>
+  </div>
+
+</div>
+
+<script src="leaderboard.js"></script>
+<script>
+  const myName = localStorage.getItem('bridgePlayerName') || '';
+  let activeLevel = 0;
+
+  function buildTabs() {
+    const all  = lbGetAll();
+    const wrap = document.getElementById('tabs');
+    wrap.innerHTML = '';
+    for (let i = 0; i < 10; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'tab' + (i === activeLevel ? ' active' : '');
+      btn.innerHTML = `${i+1}. ${LEVEL_NAMES[i]} <span class="cnt">(${all[i].length})</span>`;
+      btn.onclick = () => { activeLevel = i; render(); };
+      wrap.appendChild(btn);
+    }
+  }
+
+  function render() {
+    buildTabs();
+    const scores = lbGetLevel(activeLevel);
+    const body   = document.getElementById('tableBody');
+    if (!scores.length) {
+      body.innerHTML = '<div class="empty">No scores yet — be the first!</div>';
+      return;
+    }
+    body.innerHTML = scores.map((s, i) => {
+      const rc   = i===0?'g':i===1?'s':i===2?'b':'';
+      const row  = i===0?' gold':i===1?' silver':i===2?' bronze':'';
+      const med  = i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1;
+      const sts  = '★'.repeat(s.stars)+'<span style="opacity:.18">★</span>'.repeat(3-s.stars);
+      const me   = s.name.toLowerCase()===myName.toLowerCase();
+      return `
+        <div class="row${row}">
+          <div class="rank-num ${rc}">${med}</div>
+          <div class="pname ${me?'me':''}">${s.name}${me?' (you)':''}</div>
+          <div class="stars-col">${sts}</div>
+          <div class="cost-col">$${s.cost.toLocaleString()}</div>
+          <div><span class="pill ${s.mode}">${s.mode}</span></div>
+          <div class="date-col">${s.date}</div>
+        </div>`;
+    }).join('');
+  }
+
+  function exportLB() {
+    const blob = new Blob([lbExportText()], {type:'text/plain'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'bridge_leaderboard_v6.txt';
+    a.click();
+  }
+  function clearLB() {
+    if (confirm('Delete ALL leaderboard scores? This cannot be undone.')) {
+      lbClear(); render();
+    }
+  }
+
+  render();
+</script>
+</body>
+</html>

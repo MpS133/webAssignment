@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Select Level — Bridge Simulator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Nunito',sans-serif;overflow:hidden;height:100vh;width:100vw}
+
+    .bg{position:fixed;inset:0;z-index:0;
+      background-image:url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1920&q=90');
+      background-size:cover;background-position:center 40%;
+      animation:drift 24s ease-in-out infinite alternate}
+    @keyframes drift{from{transform:scale(1.05)}to{transform:scale(1.09) translate(-1%,0.5%)}}
+    .bg::before{content:'';position:absolute;inset:0;
+      background:linear-gradient(180deg,rgba(5,12,30,0.65) 0%,rgba(10,20,40,0.4) 40%,rgba(5,12,28,0.75) 100%)}
+
+    .page{position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;
+      height:100vh;overflow-y:auto;padding:20px 16px 40px}
+
+    /* Top bar */
+    .topbar{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:700px;margin-bottom:14px}
+    .pill-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 20px;
+      background:rgba(255,255,255,0.1);backdrop-filter:blur(12px);
+      border:1px solid rgba(255,255,255,0.2);border-radius:50px;
+      font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;
+      cursor:pointer;color:rgba(255,255,255,0.85);text-decoration:none;transition:all 0.18s;letter-spacing:0.5px}
+    .pill-btn:hover{background:rgba(255,255,255,0.18);color:#fff;transform:translateX(-3px)}
+    .pill-btn.right:hover{transform:translateX(3px)}
+
+    /* Mode tabs */
+    .mode-tabs{display:flex;gap:8px;background:rgba(0,0,0,0.3);backdrop-filter:blur(16px);
+      border:1px solid rgba(255,255,255,0.12);border-radius:50px;padding:5px;margin-bottom:16px}
+    .tab-btn{display:flex;align-items:center;gap:7px;padding:9px 22px;border:none;border-radius:40px;
+      font-family:'Baloo 2',cursive;font-size:14px;font-weight:800;letter-spacing:.5px;
+      cursor:pointer;transition:all 0.2s;color:rgba(255,255,255,0.5);background:transparent}
+    .tab-btn.active-classic{background:linear-gradient(135deg,rgba(60,200,120,0.5),rgba(20,100,60,0.6));
+      color:#fff;box-shadow:0 4px 16px rgba(30,180,100,0.3)}
+    .tab-btn.active-ranked{background:linear-gradient(135deg,rgba(255,180,30,0.5),rgba(200,60,10,0.6));
+      color:#fff;box-shadow:0 4px 16px rgba(255,140,0,0.3)}
+    .tab-btn:not(.active-classic):not(.active-ranked):hover{color:rgba(255,255,255,0.75);background:rgba(255,255,255,0.08)}
+
+    /* Title */
+    .ls-title{font-family:'Baloo 2',cursive;font-size:42px;color:#fff;
+      text-shadow:0 0 40px rgba(100,200,255,0.5),0 4px 16px rgba(0,0,0,0.8);
+      margin-bottom:6px;letter-spacing:-1px;animation:fadeUp 0.6s ease both;text-align:center}
+    .mode-subtitle{font-size:11px;font-weight:800;letter-spacing:3px;margin-bottom:16px;text-transform:uppercase;
+      animation:fadeUp 0.6s 0.1s ease both;text-align:center}
+    .mode-subtitle.classic{color:rgba(80,220,140,0.7)}
+    .mode-subtitle.ranked{color:rgba(255,200,60,0.7)}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+    /* Ranked total stars bar */
+    .rank-summary{display:none;align-items:center;gap:10px;padding:8px 20px;
+      background:rgba(255,200,60,0.1);border:1px solid rgba(255,200,60,0.25);border-radius:20px;
+      margin-bottom:14px;font-size:12px;font-weight:800;color:rgba(255,210,100,0.85);letter-spacing:.5px;
+      animation:fadeUp 0.6s 0.15s ease both}
+    .rank-summary.show{display:flex}
+
+    /* Grid */
+    .level-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;max-width:700px;width:100%}
+
+    @media(max-width:640px){
+      .level-grid{grid-template-columns:repeat(2,1fr);gap:10px;max-width:100%}
+      .ls-title{font-size:28px}
+      .lc-num{font-size:26px}
+      .level-card{padding:12px 6px 10px}
+      .pill-btn{padding:7px 14px;font-size:12px}
+      .mode-tabs{flex-wrap:wrap;border-radius:16px}
+      .tab-btn{padding:7px 14px;font-size:13px}
+      .page{padding:14px 12px 32px}
+      .topbar{margin-bottom:10px}
+    }
+
+    .level-card{background:rgba(255,255,255,0.09);backdrop-filter:blur(16px);
+      border:1px solid rgba(255,255,255,0.14);border-radius:18px;
+      padding:14px 8px 12px;text-align:center;cursor:pointer;
+      transition:all 0.2s;text-decoration:none;display:block;
+      animation:fadeUp 0.5s ease both;position:relative;}
+    .level-card:hover{background:rgba(255,255,255,0.18);border-color:rgba(255,255,255,0.35);
+      transform:translateY(-6px) scale(1.04);box-shadow:0 12px 32px rgba(0,0,0,0.4)}
+
+    /* Tutorial card */
+    .tuto-card{border-color:rgba(80,220,80,0.3)}
+    .lc-badge{position:absolute;top:5px;right:5px;background:#3ab03a;color:#fff;
+      font-size:8px;font-weight:900;letter-spacing:.5px;padding:2px 6px;border-radius:20px}
+
+    /* Level number */
+    .lc-num{font-family:'Baloo 2',cursive;font-size:34px;color:#ff6b6b;line-height:1;
+      text-shadow:0 0 20px rgba(255,100,100,0.6)}
+    .tuto-card .lc-num{color:#5ce85c;text-shadow:0 0 20px rgba(80,220,80,0.6)}
+
+    .lc-name{font-size:9px;color:rgba(255,255,255,0.6);letter-spacing:.5px;margin-top:3px;text-transform:uppercase;font-weight:800}
+    .lc-budget{font-size:9.5px;color:rgba(255,255,255,0.32);margin-top:4px;font-weight:700}
+
+    /* Stars row on card */
+    .lc-stars{font-size:11px;margin-top:5px;letter-spacing:-1px;min-height:14px}
+
+    /* LOCKED card state */
+    .level-card.locked{cursor:not-allowed;opacity:0.45;filter:grayscale(0.7)}
+    .level-card.locked:hover{transform:none;box-shadow:none;background:rgba(255,255,255,0.09);border-color:rgba(255,255,255,0.14)}
+    .lock-icon{font-size:20px;margin:4px 0 2px}
+
+    /* Completed card */
+    .level-card.completed{border-color:rgba(255,200,60,0.35)}
+    .level-card.completed .lc-num{color:#ffd44a;text-shadow:0 0 20px rgba(255,200,60,0.6)}
+
+    /* Stagger card anims */
+    .level-card:nth-child(1){animation-delay:0.05s}.level-card:nth-child(2){animation-delay:0.09s}
+    .level-card:nth-child(3){animation-delay:0.13s}.level-card:nth-child(4){animation-delay:0.17s}
+    .level-card:nth-child(5){animation-delay:0.21s}.level-card:nth-child(6){animation-delay:0.25s}
+    .level-card:nth-child(7){animation-delay:0.29s}.level-card:nth-child(8){animation-delay:0.33s}
+    .level-card:nth-child(9){animation-delay:0.37s}.level-card:nth-child(10){animation-delay:0.41s}
+
+    /* Reset ranked button */
+    .reset-btn{display:none;align-items:center;gap:6px;padding:7px 16px;margin-top:8px;
+      background:rgba(255,60,60,0.12);border:1px solid rgba(255,80,80,0.28);border-radius:20px;
+      font-size:11px;font-weight:800;color:rgba(255,140,140,0.8);letter-spacing:.5px;
+      cursor:pointer;font-family:'Nunito',sans-serif;transition:all 0.2s}
+    .reset-btn:hover{background:rgba(255,60,60,0.25);color:rgba(255,180,180,1)}
+    .reset-btn.show{display:flex}
+
+    .music-btn{position:fixed;bottom:22px;right:22px;z-index:50;
+      display:flex;align-items:center;gap:7px;padding:9px 18px;
+      background:rgba(255,255,255,0.09);backdrop-filter:blur(14px);
+      border:1px solid rgba(255,255,255,0.18);border-radius:50px;
+      color:rgba(255,255,255,0.85);font-size:12px;font-weight:800;
+      cursor:pointer;letter-spacing:1px;font-family:'Nunito',sans-serif;transition:all 0.2s}
+    .music-btn:hover{background:rgba(255,255,255,0.16);transform:scale(1.04)}
+    .music-btn.off{background:rgba(200,50,50,0.3);border-color:rgba(255,80,80,0.4)}
+
+    ::-webkit-scrollbar{width:5px}
+    ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.2);border-radius:3px}
+  </style>
+</head>
+<body>
+
+<div class="bg"></div>
+
+<div class="page">
+  <div class="topbar">
+    <a class="pill-btn" href="index.html" onclick="BSAudio.sfx('click')">‹ HOME</a>
+    <a class="pill-btn right" href="settings.html" onclick="BSAudio.sfx('click')">⚙ SETTINGS</a>
+  </div>
+
+  <!-- Mode tabs -->
+  <div class="mode-tabs">
+    <button class="tab-btn" id="tabClassic" onclick="switchMode('classic')">🎮 CLASSIC</button>
+    <button class="tab-btn" id="tabRanked"  onclick="switchMode('ranked')">🏆 RANKED</button>
+  </div>
+
+  <h2 class="ls-title">SELECT LEVEL</h2>
+  <p class="mode-subtitle" id="modeSubtitle"></p>
+
+  <!-- Ranked summary bar -->
+  <div class="rank-summary" id="rankSummary"></div>
+
+  <div class="level-grid" id="levelGrid"></div>
+
+  <!-- Reset ranked progress -->
+  <button class="reset-btn" id="resetBtn" onclick="confirmReset()">🗑 Reset Ranked Progress</button>
+</div>
+
+<button class="music-btn" id="musicBtn" onclick="toggleMusic()">🎵 MUSIC ON</button>
+
+<script src="audio.js"></script>
+<script>
+// ── Level definitions ───────────────────────────────────────────
+const LEVELS=[
+  {name:'Tutorial Gap',  tutorial:true, budget:99999},
+  {name:'River Crossing',              budget:5000},
+  {name:'Double Span',                 budget:7000},
+  {name:'Deep Chasm',                  budget:6500},
+  {name:'Asymmetric',                  budget:6000},
+  {name:'Tight Budget',                budget:2200},
+  {name:'Mid-River Rock',              budget:7500},
+  {name:'Triple Chasm',                budget:10000},
+  {name:'Steep Canyon',                budget:8000},
+  {name:'Grand Finale',                budget:14000},
+];
+
+// ── LocalStorage helpers ────────────────────────────────────────
+function loadProgress(){
+  try{ return JSON.parse(localStorage.getItem('bridgeProgress')||'{}'); }
+  catch(e){ return {}; }
+}
+function getUnlocked(p){ return p.unlockedLevel ?? 0; }  // 0 = only tutorial unlocked
+function getStars(p,i){ return (p.stars||[])[i]||0; }
+function isCompleted(p,i){ return !!((p.completed||[])[i]); }
+
+// ── Mode state ──────────────────────────────────────────────────
+const urlParams = new URLSearchParams(window.location.search);
+let currentMode = urlParams.get('mode') || 'classic';
+
+function switchMode(m){
+  currentMode = m;
+  history.replaceState(null,'',`levelselect.html?mode=${m}`);
+  renderGrid();
+}
+
+// ── Render ──────────────────────────────────────────────────────
+function renderGrid(){
+  const grid = document.getElementById('levelGrid');
+  const tabC = document.getElementById('tabClassic');
+  const tabR = document.getElementById('tabRanked');
+  const sub  = document.getElementById('modeSubtitle');
+  const rankSum = document.getElementById('rankSummary');
+  const resetBtn = document.getElementById('resetBtn');
+
+  // Tab styles
+  tabC.className='tab-btn'+(currentMode==='classic'?' active-classic':'');
+  tabR.className='tab-btn'+(currentMode==='ranked'?' active-ranked':'');
+
+  // Subtitle
+  sub.className='mode-subtitle '+currentMode;
+  sub.textContent = currentMode==='classic'
+    ? 'No Budget · All Levels Unlocked · Free Build'
+    : 'Stay Within Budget · Complete In Order · Earn ⭐⭐⭐';
+
+  // Load ranked progress
+  const prog = loadProgress();
+  const unlocked = getUnlocked(prog);
+  const totalStars = (prog.stars||[]).reduce((s,x)=>s+(x||0),0);
+  const completedCount = (prog.completed||[]).filter(Boolean).length;
+
+  // Ranked summary bar
+  if(currentMode==='ranked' && completedCount>0){
+    rankSum.className='rank-summary show';
+    rankSum.innerHTML=`🏅 Progress: ${completedCount}/10 levels &nbsp;|&nbsp; ${totalStars} ⭐ total`;
+  } else {
+    rankSum.className='rank-summary';
+  }
+
+  // Reset button
+  if(currentMode==='ranked' && completedCount>0) resetBtn.classList.add('show');
+  else resetBtn.classList.remove('show');
+
+  // Build level cards
+  grid.innerHTML='';
+  LEVELS.forEach((lv,i)=>{
+    const isUnlocked = currentMode==='classic' || i <= unlocked;
+    const stars = getStars(prog,i);
+    const done  = isCompleted(prog,i);
+
+    const card = document.createElement(isUnlocked ? 'a' : 'div');
+    let cls = 'level-card';
+    if(lv.tutorial) cls+=' tuto-card';
+    if(!isUnlocked) cls+=' locked';
+    else if(done && currentMode==='ranked') cls+=' completed';
+    card.className = cls;
+
+    if(isUnlocked) card.href = `game.html?level=${i}&mode=${currentMode}`;
+
+    // Stars display
+    let starsHtml = '';
+    if(currentMode==='ranked'){
+      if(done){
+        starsHtml = '⭐'.repeat(stars) + '<span style="opacity:0.2">⭐</span>'.repeat(3-stars);
+      } else if(isUnlocked){
+        starsHtml = '<span style="opacity:0.2">⭐⭐⭐</span>';
+      }
+    }
+
+    if(!isUnlocked){
+      card.innerHTML=`
+        <div class="lock-icon">🔒</div>
+        <div class="lc-num">${i+1}</div>
+        <div class="lc-name">${lv.name}</div>
+        <div class="lc-stars">&nbsp;</div>`;
+    } else {
+      card.innerHTML=`
+        ${lv.tutorial?'<div class="lc-badge">TUTO</div>':''}
+        <div class="lc-num">${i+1}</div>
+        <div class="lc-name">${lv.name}</div>
+        <div class="lc-budget">${currentMode==='classic'||lv.budget>90000?'FREE':'$'+lv.budget.toLocaleString()}</div>
+        <div class="lc-stars">${starsHtml}</div>`;
+      card.addEventListener('click',()=>BSAudio.sfx('click'));
+    }
+
+    // Stagger animation
+    card.style.animationDelay = `${0.05+i*0.04}s`;
+    grid.appendChild(card);
+  });
+}
+
+function confirmReset(){
+  if(confirm('Reset all ranked progress? This cannot be undone.')){
+    localStorage.removeItem('bridgeProgress');
+    BSAudio.sfx('delete');
+    renderGrid();
+  }
+}
+
+// Initial render
+renderGrid();
+
+// ── Audio ───────────────────────────────────────────────────────
+BSAudio.loadSettings();
+let started=false;
+function tryStart(){if(started)return;started=true;BSAudio.unlock();if(BSAudio.cfg.soundOn)BSAudio.playBg('levelsel');updateBtn();}
+document.addEventListener('click',tryStart);
+function toggleMusic(){
+  BSAudio.cfg.soundOn=!BSAudio.cfg.soundOn;
+  if(BSAudio.cfg.soundOn){if(!started)tryStart();else BSAudio.playBg('levelsel');}
+  else BSAudio.stopBg();
+  updateBtn();
+  try{const s=JSON.parse(localStorage.getItem('bridgeSettings')||'{}');s.soundOn=BSAudio.cfg.soundOn;localStorage.setItem('bridgeSettings',JSON.stringify(s));}catch(e){}
+}
+function updateBtn(){
+  const b=document.getElementById('musicBtn');
+  b.textContent=BSAudio.cfg.soundOn?'🎵 MUSIC ON':'🔇 MUSIC OFF';
+  b.className='music-btn'+(BSAudio.cfg.soundOn?'':' off');
+}
+updateBtn();
+</script>
+</body>
+</html>
