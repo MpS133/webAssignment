@@ -175,6 +175,8 @@ bridgeSimV6/
 ├── audio.js            — Web Audio API sound engine (BSAudio)
 ├── leaderboard.js      — localStorage leaderboard system
 └── replay.js           — localStorage bridge snapshot/replay system
+└── assests           — to show the image in the github.
+
 ```
 
 ---
