@@ -25,7 +25,19 @@ A physics-based browser bridge-building game built with vanilla JavaScript and H
 
 Bridge Simulator challenges players to design and build structurally sound bridges using different materials, then test them under the weight of a moving vehicle. Each level has a unique terrain, budget, and difficulty. The game tracks scores locally — no account or internet connection required after the initial font load.
 
-![Game Screenshot](https://via.placeholder.com/800x400/0d1030/ffd44a?text=Bridge+Simulator+V6)
+![Game Screenshot](assets/screenshot.png)
+![Game Screenshot](assets/screenshot2.png)
+![Game Screenshot](assets/screenshot3.png)
+![Game Screenshot](assets/screenshot4.png)
+![Game Screenshot](assets/screenshot.png)
+![Game Screenshot](assets/screenshot5.png)
+![Game Screenshot](assets/screenshot6.png)
+![Game Screenshot](assets/screenshot7.png)
+![Game Screenshot](assets/screenshot8.png)
+![Game Screenshot](assets/screenshot9.png)
+![Game Screenshot](assets/screenshot10.png)
+![Game Screenshot](assets/screenshot11.png)
+![Game Screenshot](assets/screenshot12.png)
 
 ---
 
@@ -174,7 +186,9 @@ bridgeSimV6/
 ├── game.js             — Core game engine (physics, rendering, input)
 ├── audio.js            — Web Audio API sound engine (BSAudio)
 ├── leaderboard.js      — localStorage leaderboard system
-└── replay.js           — localStorage bridge snapshot/replay system
+├──replay.js            — localStorage bridge snapshot/replay system
+└── assets              — to show the image in the github.
+
 ```
 
 ---
