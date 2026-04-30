@@ -163,7 +163,7 @@ When you win a level, the game automatically saves a snapshot of your bridge str
 ## localStorage Keys
 
 | Key                | Description                                  |
-|----- --------------|----------------------------------------------|
+|--------------------|----------------------------------------------|
 | `bridgePlayerName` | Player display name (set on first launch)    |
 | `bridgeProgress`   | Ranked mode unlock progress and star ratings |
 | `bridgeSettings`   | Sound settings (master volume, SFX, on/off)  |
