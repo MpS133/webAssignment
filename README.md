@@ -162,13 +162,13 @@ When you win a level, the game automatically saves a snapshot of your bridge str
 
 ## localStorage Keys
 
-| Key | Description |
-|---|---|
-| `bridgePlayerName` | Player display name (set on first launch) |
-| `bridgeProgress` | Ranked mode unlock progress and star ratings |
-| `bridgeSettings` | Sound settings (master volume, SFX, on/off) |
-| `bridgeScores` | Leaderboard entries for all levels |
-| `bridgeReplays` | Bridge snapshots for each completed level |
+| Key                | Description                                  |
+|----- --------------|----------------------------------------------|
+| `bridgePlayerName` | Player display name (set on first launch)    |
+| `bridgeProgress`   | Ranked mode unlock progress and star ratings |
+| `bridgeSettings`   | Sound settings (master volume, SFX, on/off)  |
+| `bridgeScores`     | Leaderboard entries for all levels           |
+| `bridgeReplays`    | Bridge snapshots for each completed level    |
 
 ---
 
@@ -218,14 +218,14 @@ The game uses a **Verlet integration** particle system with constraint-based bea
 
 ## Version History
 
-| Version | Key Changes |
-
-| V1 | Basic canvas physics prototype |
-| V2 | Materials system, budget |
-| V3 | Level progression, win/fail modals |
-| V4 | Audio engine, ranked mode, star ratings |
-| V5 | Unique animated backgrounds per level, tutorial overhaul, classic/ranked mode split |
-| **V6** | **Local leaderboard system, bridge replay system, required player name modal** |
+| Version | Key Changes                                                                         |
+|---------|-------------------------------------------------------------------------------------|
+| V1      | Basic canvas physics prototype                                                      |
+| V2      | Materials system, budget                                                            |
+| V3      | Level progression, win/fail modals                                                  |
+| V4      | Audio engine, ranked mode, star ratings                                             |
+| V5      | Unique animated backgrounds per level, tutorial overhaul, classic/ranked mode split |
+| V6      | **Local leaderboard system, bridge replay system, required player name modal**      |
 
 ---
 
